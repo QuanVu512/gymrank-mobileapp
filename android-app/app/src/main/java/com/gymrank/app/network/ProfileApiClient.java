@@ -41,8 +41,8 @@ public final class ProfileApiClient {
             byte[] payload = body.toString().getBytes(StandardCharsets.UTF_8);
             URL url = new URL(ApiConfig.BASE_URL + "/onboarding/profile");
             connection = (HttpURLConnection) url.openConnection();
-            connection.setConnectTimeout(4000);
-            connection.setReadTimeout(4000);
+            connection.setConnectTimeout(ApiConfig.NETWORK_TIMEOUT_MS);
+            connection.setReadTimeout(ApiConfig.NETWORK_TIMEOUT_MS);
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
             connection.setRequestProperty("Accept", "application/json");

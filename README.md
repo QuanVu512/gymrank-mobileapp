@@ -129,6 +129,12 @@ Khi muon share APK cho nguoi khac dung, can deploy backend online truoc, xem:
 docs/DEPLOY_RENDER.md
 ```
 
+Backend online hien tai:
+
+```text
+https://gymrank-api.onrender.com/api/v1
+```
+
 ## Giai doan hien tai
 
 Day la skeleton dau tien de bat dau coding. Chua phai san pham hoan chinh.

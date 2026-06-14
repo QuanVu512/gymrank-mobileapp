@@ -34,8 +34,8 @@ public final class AuthApiClient {
 
                 URL url = new URL(ApiConfig.BASE_URL + path);
                 connection = (HttpURLConnection) url.openConnection();
-                connection.setConnectTimeout(5000);
-                connection.setReadTimeout(5000);
+                connection.setConnectTimeout(ApiConfig.NETWORK_TIMEOUT_MS);
+                connection.setReadTimeout(ApiConfig.NETWORK_TIMEOUT_MS);
                 connection.setRequestMethod("POST");
                 connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
                 connection.setRequestProperty("Accept", "application/json");
