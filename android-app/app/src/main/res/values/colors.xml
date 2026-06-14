@@ -1,0 +1,13 @@
+<resources>
+    <color name="gr_background">#0D0916</color>
+    <color name="gr_surface">#191324</color>
+    <color name="gr_surface_alt">#241D31</color>
+    <color name="gr_border">#3C344A</color>
+    <color name="gr_blue">#55B8F2</color>
+    <color name="gr_blue_dark">#268AC7</color>
+    <color name="gr_gold">#F7B733</color>
+    <color name="gr_green">#6DD47E</color>
+    <color name="gr_text">#FFFFFF</color>
+    <color name="gr_text_muted">#B8B0C8</color>
+    <color name="gr_text_dim">#756D82</color>
+</resources>

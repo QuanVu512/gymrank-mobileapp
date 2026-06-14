@@ -1,0 +1,29 @@
+# IntelliJ / Android Studio
+.idea/
+*.iml
+
+# Gradle
+.gradle/
+build/
+**/build/
+
+# Android
+local.properties
+captures/
+*.apk
+*.aab
+
+# Java
+out/
+target/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+*.env
+
+# Local scratch
+.scratch/
