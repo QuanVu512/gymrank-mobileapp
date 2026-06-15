@@ -16,13 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
-import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class ProfileService {
-
-    private static final String LOCAL_DEMO_EMAIL = "local-demo@gymrank.local";
 
     private final AppUserRepository appUserRepository;
     private final UserProfileRepository userProfileRepository;
@@ -42,8 +38,8 @@ public class ProfileService {
     }
 
     @Transactional
-    public ProfileSummaryResponse saveOnboardingProfile(OnboardingProfileRequest request) {
-        AppUser user = resolveUserForWrite(request.userId(), request.displayName());
+    public ProfileSummaryResponse saveOnboardingProfile(AppUser authenticatedUser, OnboardingProfileRequest request) {
+        AppUser user = requireExistingUser(authenticatedUser);
 
         UserProfile profile = userProfileRepository.findById(user.getId())
                 .orElseGet(() -> new UserProfile(user));
@@ -73,56 +69,19 @@ public class ProfileService {
     }
 
     @Transactional(readOnly = true)
-    public ProfileSummaryResponse getSummary(String userId) {
-        Optional<UUID> publicId = parsePublicId(userId);
-        if (publicId.isPresent()) {
-            Optional<AppUser> user = appUserRepository.findByPublicId(publicId.get());
-            if (user.isPresent()) {
-                UserProfile profile = userProfileRepository.findById(user.get().getId()).orElse(null);
-                UserStats stats = userStatsRepository.findById(user.get().getId()).orElse(new UserStats(user.get()));
-                return toSummary(user.get(), profile, stats, profile != null);
-            }
-        }
-
-        Optional<UserProfile> latestProfile = userProfileRepository.findTopByOrderByUpdatedAtDesc();
-        if (latestProfile.isPresent()) {
-            AppUser user = latestProfile.get().getUser();
-            UserStats stats = userStatsRepository.findById(user.getId()).orElse(new UserStats(user));
-            return toSummary(user, latestProfile.get(), stats, true);
-        }
-
-        return defaultSummary();
+    public ProfileSummaryResponse getSummary(AppUser authenticatedUser) {
+        AppUser user = requireExistingUser(authenticatedUser);
+        UserProfile profile = userProfileRepository.findById(user.getId()).orElse(null);
+        UserStats stats = userStatsRepository.findById(user.getId()).orElse(new UserStats(user));
+        return toSummary(user, profile, stats, profile != null);
     }
 
-    private AppUser resolveUserForWrite(String userId, String displayName) {
-        Optional<UUID> publicId = parsePublicId(userId);
-        if (publicId.isPresent()) {
-            return appUserRepository.findByPublicId(publicId.get())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Người dùng không tồn tại."));
+    private AppUser requireExistingUser(AppUser authenticatedUser) {
+        if (authenticatedUser == null || authenticatedUser.getId() == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "API này cần đăng nhập.");
         }
-
-        return appUserRepository.findByEmail(LOCAL_DEMO_EMAIL)
-                .orElseGet(() -> {
-                    AppUser demoUser = appUserRepository.save(new AppUser(
-                            LOCAL_DEMO_EMAIL,
-                            null,
-                            displayName == null || displayName.isBlank() ? "Local Demo" : displayName
-                    ));
-                    userStatsRepository.save(new UserStats(demoUser));
-                    return demoUser;
-                });
-    }
-
-    private Optional<UUID> parsePublicId(String userId) {
-        if (userId == null || userId.trim().isEmpty()) {
-            return Optional.empty();
-        }
-
-        try {
-            return Optional.of(UUID.fromString(userId.trim()));
-        } catch (IllegalArgumentException exception) {
-            return Optional.empty();
-        }
+        return appUserRepository.findById(authenticatedUser.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Người dùng không tồn tại."));
     }
 
     private ProfileSummaryResponse toSummary(AppUser user, UserProfile profile, UserStats stats, boolean synced) {
@@ -138,22 +97,6 @@ public class ProfileService {
                 stats.getRankPoints(),
                 synced,
                 profile == null || profile.getUpdatedAt() == null ? Instant.now() : profile.getUpdatedAt()
-        );
-    }
-
-    private ProfileSummaryResponse defaultSummary() {
-        return new ProfileSummaryResponse(
-                "Chưa đồng bộ",
-                "BEGINNER",
-                "CONSISTENT",
-                3,
-                "SKIP",
-                1,
-                0,
-                0,
-                0,
-                false,
-                Instant.now()
         );
     }
 }

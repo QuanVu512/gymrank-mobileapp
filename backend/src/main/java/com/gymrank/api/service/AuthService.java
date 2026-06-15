@@ -6,6 +6,7 @@ import com.gymrank.api.persistence.AppUser;
 import com.gymrank.api.persistence.AppUserRepository;
 import com.gymrank.api.persistence.UserStats;
 import com.gymrank.api.persistence.UserStatsRepository;
+import com.gymrank.api.security.TokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,10 +24,12 @@ public class AuthService {
 
     private final AppUserRepository appUserRepository;
     private final UserStatsRepository userStatsRepository;
+    private final TokenService tokenService;
 
-    public AuthService(AppUserRepository appUserRepository, UserStatsRepository userStatsRepository) {
+    public AuthService(AppUserRepository appUserRepository, UserStatsRepository userStatsRepository, TokenService tokenService) {
         this.appUserRepository = appUserRepository;
         this.userStatsRepository = userStatsRepository;
+        this.tokenService = tokenService;
     }
 
     @Transactional
@@ -41,7 +44,7 @@ public class AuthService {
         AppUser user = appUserRepository.save(new AppUser(email, createPasswordHash(request.password()), displayName));
         userStatsRepository.save(new UserStats(user));
 
-        return toResponse(user, true);
+        return toResponse(user, tokenService.createSession(user), true);
     }
 
     @Transactional
@@ -55,15 +58,15 @@ public class AuthService {
         }
 
         user.markLoggedIn();
-        return toResponse(user, false);
+        return toResponse(user, tokenService.createSession(user), false);
     }
 
-    private AuthResponse toResponse(AppUser user, boolean newUser) {
+    private AuthResponse toResponse(AppUser user, String token, boolean newUser) {
         return new AuthResponse(
                 user.getPublicId().toString(),
                 user.getFullName(),
                 user.getEmail(),
-                UUID.randomUUID().toString(),
+                token,
                 newUser
         );
     }

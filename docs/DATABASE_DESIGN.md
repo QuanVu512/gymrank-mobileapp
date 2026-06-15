@@ -45,6 +45,24 @@ Ghi chu:
 - `public_id`: UUID de app/API dung ben ngoai, tranh lo id tang dan.
 - `password_hash`: MVP co the luu dang `salt:hash`; production nen doi sang BCrypt.
 
+### auth_sessions
+
+```text
+id
+user_id
+token_hash
+created_at
+expires_at
+last_used_at
+revoked_at
+```
+
+Ghi chu:
+
+- Backend chi luu hash cua token, khong luu token goc.
+- App gui token bang header `Authorization: Bearer <token>` khi goi API ca nhan.
+- Token het han sau 30 ngay trong MVP; sau nay co the them logout/revoke theo thiet bi.
+
 ### user_profiles
 
 ```text

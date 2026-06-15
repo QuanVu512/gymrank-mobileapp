@@ -111,12 +111,12 @@ Response:
   "userId": "uuid",
   "displayName": "Quan",
   "email": "quan@example.com",
-  "token": "session-token-tam-thoi",
+  "token": "session-token",
   "newUser": true
 }
 ```
 
-Luu y: Auth MVP hien tai luu trong memory cua backend. Khi restart backend, tai khoan se mat. Buoc database online se giai quyet viec nay.
+Luu y: token duoc luu dang hash trong bang `auth_sessions`. Android gui token nay bang header `Authorization: Bearer <token>` khi goi API ca nhan.
 
 ## Onboarding profile
 
@@ -124,6 +124,7 @@ Android gui profile sau khi nguoi dung hoan thanh cau hoi:
 
 ```text
 POST /api/v1/onboarding/profile
+Authorization: Bearer <token>
 ```
 
 Body:
@@ -157,10 +158,11 @@ Response:
 }
 ```
 
-MVP hien tai luu tam trong memory cua backend. Khi restart backend, du lieu se mat. Buoc sau moi noi PostgreSQL online.
+Backend xac dinh nguoi dung tu token, khong tin vao `userId` trong body. `userId` trong body chi giu tam de Android cu khong bi vo format.
 
 ## Summary
 
 ```text
-GET /api/v1/me/summary?userId=uuid
+GET /api/v1/me/summary
+Authorization: Bearer <token>
 ```

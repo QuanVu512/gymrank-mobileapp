@@ -24,6 +24,19 @@ CREATE TABLE app_users (
     CONSTRAINT chk_app_users_auth_provider CHECK (auth_provider IN ('LOCAL', 'GOOGLE'))
 );
 
+CREATE TABLE auth_sessions (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+    token_hash CHAR(64) UNIQUE NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    expires_at TIMESTAMPTZ NOT NULL,
+    last_used_at TIMESTAMPTZ,
+    revoked_at TIMESTAMPTZ
+);
+
+CREATE INDEX idx_auth_sessions_user_id ON auth_sessions(user_id);
+CREATE INDEX idx_auth_sessions_active_token ON auth_sessions(token_hash) WHERE revoked_at IS NULL;
+
 CREATE TABLE user_profiles (
     user_id BIGINT PRIMARY KEY REFERENCES app_users(id) ON DELETE CASCADE,
     gender VARCHAR(20),

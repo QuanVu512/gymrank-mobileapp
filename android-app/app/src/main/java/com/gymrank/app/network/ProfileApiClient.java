@@ -46,6 +46,10 @@ public final class ProfileApiClient {
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
             connection.setRequestProperty("Accept", "application/json");
+            String token = AuthStore.getToken(context);
+            if (!token.isEmpty()) {
+                connection.setRequestProperty("Authorization", "Bearer " + token);
+            }
             connection.setDoOutput(true);
 
             try (OutputStream outputStream = connection.getOutputStream()) {

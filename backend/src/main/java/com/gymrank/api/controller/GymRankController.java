@@ -7,15 +7,17 @@ import com.gymrank.api.domain.OnboardingProfileRequest;
 import com.gymrank.api.domain.ProfileSummaryResponse;
 import com.gymrank.api.domain.WorkoutScoreRequest;
 import com.gymrank.api.domain.WorkoutScoreResponse;
+import com.gymrank.api.persistence.AppUser;
+import com.gymrank.api.security.AuthTokenInterceptor;
 import com.gymrank.api.service.AuthService;
 import com.gymrank.api.service.ProfileService;
 import com.gymrank.api.service.ScoringService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
@@ -71,12 +73,16 @@ public class GymRankController {
     }
 
     @PostMapping("/onboarding/profile")
-    public ProfileSummaryResponse saveOnboardingProfile(@Valid @RequestBody OnboardingProfileRequest request) {
-        return profileService.saveOnboardingProfile(request);
+    public ProfileSummaryResponse saveOnboardingProfile(@Valid @RequestBody OnboardingProfileRequest request, HttpServletRequest servletRequest) {
+        return profileService.saveOnboardingProfile(authenticatedUser(servletRequest), request);
     }
 
     @GetMapping("/me/summary")
-    public ProfileSummaryResponse profileSummary(@RequestParam(required = false) String userId) {
-        return profileService.getSummary(userId);
+    public ProfileSummaryResponse profileSummary(HttpServletRequest servletRequest) {
+        return profileService.getSummary(authenticatedUser(servletRequest));
+    }
+
+    private AppUser authenticatedUser(HttpServletRequest request) {
+        return (AppUser) request.getAttribute(AuthTokenInterceptor.AUTHENTICATED_USER_ATTRIBUTE);
     }
 }
