@@ -16,11 +16,14 @@ import com.gymrank.app.data.AuthStore;
 import com.gymrank.app.data.ProfileStore;
 import com.gymrank.app.network.ApiConfig;
 import com.gymrank.app.network.AuthApiClient;
+import com.gymrank.app.network.SessionExpiredHandler;
 import com.gymrank.app.ui.common.UiFeedback;
 import com.gymrank.app.ui.home.HomeActivity;
 import com.gymrank.app.ui.onboarding.OnboardingActivity;
 
 public class AuthActivity extends Activity {
+
+    public static final String EXTRA_SESSION_EXPIRED = "com.gymrank.app.EXTRA_SESSION_EXPIRED";
 
     private TextView authTitle;
     private TextView authSubtitle;
@@ -59,6 +62,7 @@ public class AuthActivity extends Activity {
         googleButton.setOnClickListener(v -> UiFeedback.animatePress(v, this::showGoogleNotice));
 
         switchMode(false);
+        showSessionExpiredMessageIfNeeded();
     }
 
     private void switchMode(boolean register) {
@@ -136,6 +140,7 @@ public class AuthActivity extends Activity {
 
     private void handleSuccess(AuthApiClient.Result result) {
         setLoading(false);
+        SessionExpiredHandler.reset();
         AuthStore.saveSession(
                 this,
                 result.getUserId(),
@@ -172,6 +177,15 @@ public class AuthActivity extends Activity {
 
     private void showMessage(String message) {
         authMessage.setText(message);
+    }
+
+    private void showSessionExpiredMessageIfNeeded() {
+        if (!getIntent().getBooleanExtra(EXTRA_SESSION_EXPIRED, false)) {
+            return;
+        }
+        String message = "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.";
+        showMessage(message);
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
     private void showGoogleNotice() {

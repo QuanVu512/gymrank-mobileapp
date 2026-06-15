@@ -57,6 +57,10 @@ public final class ProfileApiClient {
             }
 
             int statusCode = connection.getResponseCode();
+            if (statusCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                SessionExpiredHandler.handle(context);
+                return;
+            }
             if (statusCode < 200 || statusCode >= 300) {
                 Log.w(TAG, "Profile sync failed with status: " + statusCode);
             } else {
