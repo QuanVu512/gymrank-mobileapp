@@ -104,10 +104,13 @@ public final class MuscleRankStore {
 
     public enum Rank {
         NONE("#00000000"),
-        BRONZE("#C8753D"),
-        SILVER("#C9D3DC"),
+        BRONZE("#CD7F32"),
+        SILVER("#D4DDE6"),
         GOLD("#F7B733"),
-        PLATINUM("#64D7FF");
+        PLATINUM("#91E8FF"),
+        DIAMOND("#FF5DAE"),
+        LEGENDARY("#35D07F"),
+        GYM_SLEEPER("#FF3B30");
 
         public final int color;
 
@@ -116,6 +119,15 @@ public final class MuscleRankStore {
         }
 
         public static Rank fromPoints(float points) {
+            if (points >= 200f) {
+                return GYM_SLEEPER;
+            }
+            if (points >= 120f) {
+                return LEGENDARY;
+            }
+            if (points >= 75f) {
+                return DIAMOND;
+            }
             if (points >= 40f) {
                 return PLATINUM;
             }

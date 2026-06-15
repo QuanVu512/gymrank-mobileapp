@@ -23,14 +23,14 @@ public final class WorkoutExercise {
 
     public static WorkoutExercise chestPress() {
         Map<String, Float> weights = new LinkedHashMap<>();
-        weights.put("chest", 1f);
-        weights.put("deltoids", 0.5f);
-        weights.put("triceps", 0.5f);
+        weights.put("chest", 0.5f);
+        weights.put("deltoids", 0.25f);
+        weights.put("triceps", 0.25f);
         return new WorkoutExercise(
                 "chest_press",
                 "Chest Press",
                 "Ngực, vai, tay sau",
-                "Bài đẩy ngực máy/tạ. Rank chính vào ngực, phụ vào vai và tay sau.",
+                "Bài đẩy ngực máy/tạ. 50% rank vào ngực, phần còn lại chia đều cho vai và tay sau.",
                 weights
         );
     }

@@ -84,9 +84,9 @@ public class WorkoutSyncService {
     private ExerciseRule exerciseRule(String exerciseCode) {
         return switch (exerciseCode) {
             case "chest_press" -> new ExerciseRule(Map.of(
-                    "chest", 1d,
-                    "deltoids", 0.5d,
-                    "triceps", 0.5d
+                    "chest", 0.5d,
+                    "deltoids", 0.25d,
+                    "triceps", 0.25d
             ));
             case "leg_press" -> new ExerciseRule(Map.of(
                     "quadriceps", 1d

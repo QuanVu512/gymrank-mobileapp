@@ -1,0 +1,52 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp">
+
+    <View
+        android:id="@+id/muscle_rank_color"
+        android:layout_width="14dp"
+        android:layout_height="14dp"
+        android:layout_marginRight="12dp"
+        android:background="@drawable/bg_rank_dot" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/muscle_rank_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ngực"
+            android:textColor="@color/gr_text"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/muscle_rank_points"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="0 điểm"
+            android:textColor="@color/gr_text_muted"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/muscle_rank_badge"
+        android:layout_width="wrap_content"
+        android:layout_height="36dp"
+        android:background="@drawable/bg_chip"
+        android:gravity="center"
+        android:minWidth="88dp"
+        android:text="Chưa có"
+        android:textColor="@color/gr_text_muted"
+        android:textSize="13sp"
+        android:textStyle="bold" />
+</LinearLayout>
