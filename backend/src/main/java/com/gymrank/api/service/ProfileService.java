@@ -10,12 +10,16 @@ import com.gymrank.api.persistence.UserProfile;
 import com.gymrank.api.persistence.UserProfileRepository;
 import com.gymrank.api.persistence.UserStats;
 import com.gymrank.api.persistence.UserStatsRepository;
+import com.gymrank.api.persistence.UserMuscleRankStat;
+import com.gymrank.api.persistence.UserMuscleRankStatRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Service
 public class ProfileService {
@@ -24,17 +28,20 @@ public class ProfileService {
     private final UserProfileRepository userProfileRepository;
     private final OnboardingAnswerRepository onboardingAnswerRepository;
     private final UserStatsRepository userStatsRepository;
+    private final UserMuscleRankStatRepository muscleRankStatRepository;
 
     public ProfileService(
             AppUserRepository appUserRepository,
             UserProfileRepository userProfileRepository,
             OnboardingAnswerRepository onboardingAnswerRepository,
-            UserStatsRepository userStatsRepository
+            UserStatsRepository userStatsRepository,
+            UserMuscleRankStatRepository muscleRankStatRepository
     ) {
         this.appUserRepository = appUserRepository;
         this.userProfileRepository = userProfileRepository;
         this.onboardingAnswerRepository = onboardingAnswerRepository;
         this.userStatsRepository = userStatsRepository;
+        this.muscleRankStatRepository = muscleRankStatRepository;
     }
 
     @Transactional
@@ -95,8 +102,17 @@ public class ProfileService {
                 stats.getExpPoints(),
                 stats.getCurrentStreakWeeks(),
                 stats.getRankPoints(),
+                muscleRankPoints(user),
                 synced,
                 profile == null || profile.getUpdatedAt() == null ? Instant.now() : profile.getUpdatedAt()
         );
+    }
+
+    private Map<String, Double> muscleRankPoints(AppUser user) {
+        Map<String, Double> result = new LinkedHashMap<>();
+        for (UserMuscleRankStat muscleStat : muscleRankStatRepository.findByUserIdOrderByMuscleCodeAsc(user.getId())) {
+            result.put(muscleStat.getMuscleCode(), muscleStat.getRankPoints());
+        }
+        return result;
     }
 }

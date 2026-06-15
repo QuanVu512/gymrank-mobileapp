@@ -17,6 +17,8 @@ import com.gymrank.app.R;
 import com.gymrank.app.data.AuthStore;
 import com.gymrank.app.data.MuscleRankStore;
 import com.gymrank.app.data.ProfileStore;
+import com.gymrank.app.network.AuthApiClient;
+import com.gymrank.app.network.WorkoutApiClient;
 import com.gymrank.app.ui.auth.AuthActivity;
 import com.gymrank.app.ui.common.UiFeedback;
 import com.gymrank.app.ui.workout.WorkoutExercise;
@@ -216,7 +218,7 @@ public class HomeActivity extends Activity implements WorkoutExerciseAdapter.OnW
     }
 
     @Override
-    public void onWorkoutSaved(WorkoutExercise exercise, float rankGain, int expGain, boolean cheatLike) {
+    public void onWorkoutSaved(WorkoutExercise exercise, int reps, int sets, float weightKg, float rankGain, int expGain, boolean cheatLike) {
         MuscleRankStore.addExp(this, expGain);
         if (!cheatLike) {
             for (Map.Entry<String, Float> target : exercise.muscleWeights.entrySet()) {
@@ -226,7 +228,22 @@ public class HomeActivity extends Activity implements WorkoutExerciseAdapter.OnW
 
         refreshStats();
         updateBodygraph();
+        syncWorkoutToBackend(exercise, reps, sets, weightKg);
         Toast.makeText(this, cheatLike ? "Đã cộng EXP nhẹ, không cộng rank." : "Đã cộng rank cho nhóm cơ.", Toast.LENGTH_SHORT).show();
+    }
+
+    private void syncWorkoutToBackend(WorkoutExercise exercise, int reps, int sets, float weightKg) {
+        WorkoutApiClient.syncWorkout(this, exercise, reps, sets, weightKg, new WorkoutApiClient.Callback() {
+            @Override
+            public void onSuccess(WorkoutApiClient.Result result) {
+                runOnUiThread(() -> Toast.makeText(HomeActivity.this, "Đã đồng bộ rank lên máy chủ.", Toast.LENGTH_SHORT).show());
+            }
+
+            @Override
+            public void onError(String message) {
+                runOnUiThread(() -> Toast.makeText(HomeActivity.this, message, Toast.LENGTH_SHORT).show());
+            }
+        });
     }
 
     @Override
@@ -295,9 +312,8 @@ public class HomeActivity extends Activity implements WorkoutExerciseAdapter.OnW
     }
 
     private void logout() {
+        AuthApiClient.logout(this);
         AuthStore.clear(this);
-        ProfileStore.clear(this);
-        MuscleRankStore.clear(this);
         startActivity(new Intent(this, AuthActivity.class));
         finish();
     }

@@ -166,3 +166,41 @@ Backend xac dinh nguoi dung tu token, khong tin vao `userId` trong body. `userId
 GET /api/v1/me/summary
 Authorization: Bearer <token>
 ```
+
+Response co them `muscleRankPoints` de Android khoi phuc bodygraph/rank sau khi dang nhap lai.
+
+## Workout rank sync
+
+```text
+POST /api/v1/workouts/log
+Authorization: Bearer <token>
+```
+
+Body:
+
+```json
+{
+  "exerciseCode": "chest_press",
+  "reps": 10,
+  "sets": 3,
+  "weightKg": 20
+}
+```
+
+Response:
+
+```json
+{
+  "exerciseCode": "chest_press",
+  "expGained": 4,
+  "rankGained": 3.06,
+  "cheatLike": false,
+  "totalExp": 80,
+  "totalRankPoints": 12,
+  "muscleRankPoints": {
+    "chest": 6.1,
+    "deltoids": 3.0,
+    "triceps": 3.0
+  }
+}
+```

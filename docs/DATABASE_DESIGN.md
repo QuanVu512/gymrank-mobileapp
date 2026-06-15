@@ -91,6 +91,42 @@ answered_at
 updated_at
 ```
 
+### user_muscle_rank_stats
+
+```text
+id
+user_id
+muscle_code
+rank_points
+last_trained_at
+updated_at
+```
+
+Ghi chu:
+
+- Bang nay luu diem rank theo tung nhom co cua tung user.
+- MVP dung `muscle_code` dang text de sync nhanh voi Android bodygraph. Sau nay co the noi voi `muscle_groups.code`.
+
+### workout_rank_logs
+
+```text
+id
+user_id
+exercise_code
+reps
+sets
+weight_kg
+exp_gained
+rank_gained
+cheat_like
+created_at
+```
+
+Ghi chu:
+
+- Moi lan nguoi dung bam luu bai tap se tao mot dong log.
+- Backend tu tinh diem tu reps/set/kg, khong tin diem rank do client gui len.
+
 Bang nay luu 1 dong cho moi user. Cach nay gon va de xem trong SQL Editor, phu hop khi onboarding MVP co bo cau hoi co dinh. Vi du admin co the xem:
 
 - Bao nhieu nguoi chon `LOSE_WEIGHT`.

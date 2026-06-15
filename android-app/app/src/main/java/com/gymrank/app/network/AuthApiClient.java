@@ -1,5 +1,9 @@
 package com.gymrank.app.network;
 
+import android.content.Context;
+
+import com.gymrank.app.data.AuthStore;
+
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -21,6 +25,36 @@ public final class AuthApiClient {
 
     public static void login(String email, String password, Callback callback) {
         sendAuthRequest("/auth/login", "", email, password, callback);
+    }
+
+    public static void logout(Context context) {
+        Context appContext = context.getApplicationContext();
+        String token = AuthStore.getToken(appContext);
+        Thread thread = new Thread(() -> {
+            HttpURLConnection connection = null;
+            try {
+                if (token.isEmpty()) {
+                    return;
+                }
+
+                URL url = new URL(ApiConfig.BASE_URL + "/auth/logout");
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setConnectTimeout(ApiConfig.NETWORK_TIMEOUT_MS);
+                connection.setReadTimeout(ApiConfig.NETWORK_TIMEOUT_MS);
+                connection.setRequestMethod("POST");
+                connection.setRequestProperty("Accept", "application/json");
+                connection.setRequestProperty("Authorization", "Bearer " + token);
+                connection.getResponseCode();
+            } catch (Exception ignored) {
+                // Local logout must still work even when the network is unavailable.
+            } finally {
+                if (connection != null) {
+                    connection.disconnect();
+                }
+            }
+        });
+        thread.setDaemon(true);
+        thread.start();
     }
 
     private static void sendAuthRequest(String path, String displayName, String email, String password, Callback callback) {

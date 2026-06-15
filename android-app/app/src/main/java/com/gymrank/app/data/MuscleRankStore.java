@@ -54,6 +54,20 @@ public final class MuscleRankStore {
                 .apply();
     }
 
+    public static void replaceFromServer(Context context, int exp, int rankPoints, Map<String, Float> musclePoints) {
+        boolean hasStarterWorkout = hasStarterWorkout(context) || !musclePoints.isEmpty();
+        SharedPreferences.Editor editor = prefs(context).edit().clear()
+                .putBoolean(KEY_STARTER_WORKOUT, hasStarterWorkout)
+                .putInt(KEY_EXP, Math.max(0, exp))
+                .putFloat(KEY_RANK_POINTS, Math.max(0, rankPoints));
+        for (Map.Entry<String, Float> muscle : musclePoints.entrySet()) {
+            if (muscle.getValue() > 0f) {
+                editor.putFloat(muscleKey(muscle.getKey()), muscle.getValue());
+            }
+        }
+        editor.apply();
+    }
+
     public static float getMusclePoints(Context context, String muscle) {
         return prefs(context).getFloat(muscleKey(muscle), 0f);
     }
@@ -83,7 +97,9 @@ public final class MuscleRankStore {
     }
 
     private static SharedPreferences prefs(Context context) {
-        return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        String userId = AuthStore.getUserId(context);
+        String prefsName = userId == null || userId.isEmpty() ? PREFS : PREFS + "_" + userId;
+        return context.getSharedPreferences(prefsName, Context.MODE_PRIVATE);
     }
 
     public enum Rank {
@@ -116,4 +132,3 @@ public final class MuscleRankStore {
         }
     }
 }
-

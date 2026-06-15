@@ -63,6 +63,33 @@ CREATE TABLE onboarding_answers (
     CONSTRAINT chk_onboarding_answers_training_days CHECK (training_days_per_week BETWEEN 1 AND 7)
 );
 
+CREATE TABLE user_muscle_rank_stats (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+    muscle_code VARCHAR(60) NOT NULL,
+    rank_points DOUBLE PRECISION NOT NULL DEFAULT 0,
+    last_trained_at TIMESTAMPTZ,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT uk_user_muscle_rank_stats_user_muscle UNIQUE (user_id, muscle_code)
+);
+
+CREATE INDEX idx_user_muscle_rank_stats_user_id ON user_muscle_rank_stats(user_id);
+
+CREATE TABLE workout_rank_logs (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+    exercise_code VARCHAR(80) NOT NULL,
+    reps INT NOT NULL,
+    sets INT NOT NULL,
+    weight_kg DOUBLE PRECISION NOT NULL,
+    exp_gained INT NOT NULL,
+    rank_gained DOUBLE PRECISION NOT NULL,
+    cheat_like BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_workout_rank_logs_user_created ON workout_rank_logs(user_id, created_at);
+
 -- ==========================================
 -- 2. Core exercise data
 -- ==========================================

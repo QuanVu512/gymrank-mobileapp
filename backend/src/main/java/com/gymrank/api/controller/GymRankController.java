@@ -7,11 +7,15 @@ import com.gymrank.api.domain.OnboardingProfileRequest;
 import com.gymrank.api.domain.ProfileSummaryResponse;
 import com.gymrank.api.domain.WorkoutScoreRequest;
 import com.gymrank.api.domain.WorkoutScoreResponse;
+import com.gymrank.api.domain.WorkoutLogRequest;
+import com.gymrank.api.domain.WorkoutLogResponse;
 import com.gymrank.api.persistence.AppUser;
 import com.gymrank.api.security.AuthTokenInterceptor;
+import com.gymrank.api.security.TokenService;
 import com.gymrank.api.service.AuthService;
 import com.gymrank.api.service.ProfileService;
 import com.gymrank.api.service.ScoringService;
+import com.gymrank.api.service.WorkoutSyncService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,11 +35,21 @@ public class GymRankController {
     private final ScoringService scoringService;
     private final ProfileService profileService;
     private final AuthService authService;
+    private final TokenService tokenService;
+    private final WorkoutSyncService workoutSyncService;
 
-    public GymRankController(ScoringService scoringService, ProfileService profileService, AuthService authService) {
+    public GymRankController(
+            ScoringService scoringService,
+            ProfileService profileService,
+            AuthService authService,
+            TokenService tokenService,
+            WorkoutSyncService workoutSyncService
+    ) {
         this.scoringService = scoringService;
         this.profileService = profileService;
         this.authService = authService;
+        this.tokenService = tokenService;
+        this.workoutSyncService = workoutSyncService;
     }
 
     @GetMapping("/health")
@@ -72,6 +86,12 @@ public class GymRankController {
         return authService.login(request);
     }
 
+    @PostMapping("/auth/logout")
+    public Map<String, String> logout(HttpServletRequest servletRequest) {
+        tokenService.revokeSession(bearerToken(servletRequest));
+        return Map.of("status", "ok");
+    }
+
     @PostMapping("/onboarding/profile")
     public ProfileSummaryResponse saveOnboardingProfile(@Valid @RequestBody OnboardingProfileRequest request, HttpServletRequest servletRequest) {
         return profileService.saveOnboardingProfile(authenticatedUser(servletRequest), request);
@@ -82,7 +102,17 @@ public class GymRankController {
         return profileService.getSummary(authenticatedUser(servletRequest));
     }
 
+    @PostMapping("/workouts/log")
+    public WorkoutLogResponse logWorkout(@Valid @RequestBody WorkoutLogRequest request, HttpServletRequest servletRequest) {
+        return workoutSyncService.logWorkout(authenticatedUser(servletRequest), request);
+    }
+
     private AppUser authenticatedUser(HttpServletRequest request) {
         return (AppUser) request.getAttribute(AuthTokenInterceptor.AUTHENTICATED_USER_ATTRIBUTE);
+    }
+
+    private String bearerToken(HttpServletRequest request) {
+        String authorization = request.getHeader("Authorization");
+        return authorization == null ? "" : authorization.substring("Bearer ".length()).trim();
     }
 }

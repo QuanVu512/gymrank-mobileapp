@@ -74,4 +74,8 @@ public class AuthSession {
     public void markUsed() {
         lastUsedAt = Instant.now();
     }
+
+    public void revoke() {
+        revokedAt = Instant.now();
+    }
 }

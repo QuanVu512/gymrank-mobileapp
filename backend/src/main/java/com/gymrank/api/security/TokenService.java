@@ -51,6 +51,16 @@ public class TokenService {
         return session.getUser();
     }
 
+    @Transactional
+    public void revokeSession(String rawToken) {
+        if (rawToken == null || rawToken.isBlank()) {
+            return;
+        }
+
+        authSessionRepository.findActiveCandidateByTokenHash(hashToken(rawToken.trim()))
+                .ifPresent(AuthSession::revoke);
+    }
+
     private String generateRawToken() {
         byte[] bytes = new byte[32];
         secureRandom.nextBytes(bytes);

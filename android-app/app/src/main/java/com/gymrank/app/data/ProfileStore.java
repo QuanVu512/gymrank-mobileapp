@@ -33,6 +33,17 @@ public final class ProfileStore {
                 .apply();
     }
 
+    public static void saveProfile(Context context, String displayName, String experience, String goal, int trainingDays, String bodygraphType) {
+        prefs(context).edit()
+                .putBoolean(KEY_COMPLETED, true)
+                .putString(KEY_NAME, displayName == null || displayName.isBlank() ? "Bạn" : displayName)
+                .putString(KEY_EXPERIENCE, experience == null || experience.isBlank() ? "BEGINNER" : experience)
+                .putString(KEY_GOAL, goal == null || goal.isBlank() ? "CONSISTENT" : goal)
+                .putString(KEY_DAYS, String.valueOf(trainingDays <= 0 ? 3 : trainingDays))
+                .putString(KEY_BODYGRAPH, bodygraphType == null || bodygraphType.isBlank() ? "SKIP" : bodygraphType)
+                .apply();
+    }
+
     public static String getName(Context context) {
         return prefs(context).getString(KEY_NAME, "Bạn");
     }
@@ -58,6 +69,8 @@ public final class ProfileStore {
     }
 
     private static SharedPreferences prefs(Context context) {
-        return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        String userId = AuthStore.getUserId(context);
+        String prefsName = userId == null || userId.isEmpty() ? PREFS_NAME : PREFS_NAME + "_" + userId;
+        return context.getSharedPreferences(prefsName, Context.MODE_PRIVATE);
     }
 }

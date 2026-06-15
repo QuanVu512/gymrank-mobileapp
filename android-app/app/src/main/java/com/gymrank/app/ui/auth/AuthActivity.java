@@ -13,9 +13,11 @@ import android.widget.Toast;
 
 import com.gymrank.app.R;
 import com.gymrank.app.data.AuthStore;
+import com.gymrank.app.data.MuscleRankStore;
 import com.gymrank.app.data.ProfileStore;
 import com.gymrank.app.network.ApiConfig;
 import com.gymrank.app.network.AuthApiClient;
+import com.gymrank.app.network.ProfileApiClient;
 import com.gymrank.app.network.SessionExpiredHandler;
 import com.gymrank.app.ui.common.UiFeedback;
 import com.gymrank.app.ui.home.HomeActivity;
@@ -139,7 +141,6 @@ public class AuthActivity extends Activity {
     }
 
     private void handleSuccess(AuthApiClient.Result result) {
-        setLoading(false);
         SessionExpiredHandler.reset();
         AuthStore.saveSession(
                 this,
@@ -149,7 +150,43 @@ public class AuthActivity extends Activity {
                 result.getToken()
         );
 
-        Class<?> nextScreen = result.isNewUser() || !ProfileStore.isCompleted(this)
+        showMessage("Đang tải hồ sơ của bạn...");
+        ProfileApiClient.fetchSummary(this, new ProfileApiClient.SummaryCallback() {
+            @Override
+            public void onSuccess(ProfileApiClient.Summary summary) {
+                runOnUiThread(() -> openNextScreen(result.isNewUser(), summary));
+            }
+
+            @Override
+            public void onError(String message) {
+                runOnUiThread(() -> {
+                    setLoading(false);
+                    showMessage(message);
+                });
+            }
+        });
+    }
+
+    private void openNextScreen(boolean newUser, ProfileApiClient.Summary summary) {
+        setLoading(false);
+        if (summary.isSynced()) {
+            ProfileStore.saveProfile(
+                    this,
+                    summary.getDisplayName(),
+                    summary.getExperienceLevel(),
+                    summary.getMainGoal(),
+                    summary.getTrainingDaysPerWeek(),
+                    summary.getBodygraphType()
+            );
+            MuscleRankStore.replaceFromServer(
+                    this,
+                    summary.getExp(),
+                    summary.getRankPoints(),
+                    summary.getMuscleRankPoints()
+            );
+        }
+
+        Class<?> nextScreen = newUser || !summary.isSynced()
                 ? OnboardingActivity.class
                 : HomeActivity.class;
         startActivity(new Intent(this, nextScreen));

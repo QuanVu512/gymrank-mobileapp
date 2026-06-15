@@ -1,6 +1,7 @@
 package com.gymrank.api.domain;
 
 import java.time.Instant;
+import java.util.Map;
 
 public record ProfileSummaryResponse(
         String displayName,
@@ -12,6 +13,7 @@ public record ProfileSummaryResponse(
         int exp,
         int streak,
         int rankPoints,
+        Map<String, Double> muscleRankPoints,
         boolean synced,
         Instant updatedAt
 ) {

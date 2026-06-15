@@ -74,4 +74,11 @@ public class UserStats {
     public int getCurrentStreakWeeks() {
         return currentStreakWeeks;
     }
+
+    public void addWorkoutResult(int expGain, double rankGain) {
+        expPoints += Math.max(0, expGain);
+        rankPoints += Math.max(0, (int) Math.round(rankGain));
+        totalWorkouts += 1;
+        level = Math.max(1, expPoints / 1000 + 1);
+    }
 }

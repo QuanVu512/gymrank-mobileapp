@@ -82,7 +82,7 @@ public final class WorkoutExerciseAdapter extends BaseAdapter {
         }
 
         ScoreResult score = calculateScore(reps, sets, weight);
-        listener.onWorkoutSaved(exercise, score.rankGain, score.expGain, score.cheatLike);
+        listener.onWorkoutSaved(exercise, reps, sets, weight, score.rankGain, score.expGain, score.cheatLike);
         exercise.lastResult = score.cheatLike
                 ? "Bài này nghiêng cardio/cheat: +" + score.expGain + " EXP, không cộng rank."
                 : "Đã lưu: +" + format(score.rankGain) + " điểm rank nền, +" + score.expGain + " EXP.";
@@ -133,7 +133,7 @@ public final class WorkoutExerciseAdapter extends BaseAdapter {
     }
 
     public interface OnWorkoutSaved {
-        void onWorkoutSaved(WorkoutExercise exercise, float rankGain, int expGain, boolean cheatLike);
+        void onWorkoutSaved(WorkoutExercise exercise, int reps, int sets, float weightKg, float rankGain, int expGain, boolean cheatLike);
 
         void onListHeightChanged();
     }
