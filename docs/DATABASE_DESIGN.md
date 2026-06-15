@@ -63,21 +63,23 @@ updated_at
 ### onboarding_answers
 
 ```text
-id
 user_id
-question_key
-question_version
-answer_value
-answer_text
+display_name
+experience_level
+main_goal
+training_days_per_week
+bodygraph_type
 answered_at
+updated_at
 ```
 
-Bang nay quan trong cho web admin. Vi du admin co the xem:
+Bang nay luu 1 dong cho moi user. Cach nay gon va de xem trong SQL Editor, phu hop khi onboarding MVP co bo cau hoi co dinh. Vi du admin co the xem:
 
 - Bao nhieu nguoi chon `LOSE_WEIGHT`.
 - Bao nhieu nguoi la `BEGINNER`.
 - Trung binh nguoi dung muon tap may buoi/tuang.
-- Cau hoi nao nen sua vi it nguoi tra loi ro.
+
+Neu sau nay app co onboarding dong, them/bot cau hoi thuong xuyen hoac can luu lich su tung lan thay doi cau hoi, co the tach them bang lich su rieng.
 
 ## Nhom Core Data
 

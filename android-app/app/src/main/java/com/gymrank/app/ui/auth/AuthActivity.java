@@ -2,9 +2,9 @@ package com.gymrank.app.ui.auth;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.media.AudioManager;
-import android.media.ToneGenerator;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.EditText;
@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.gymrank.app.R;
 import com.gymrank.app.data.AuthStore;
 import com.gymrank.app.data.ProfileStore;
+import com.gymrank.app.network.ApiConfig;
 import com.gymrank.app.network.AuthApiClient;
 import com.gymrank.app.ui.common.UiFeedback;
 import com.gymrank.app.ui.home.HomeActivity;
@@ -31,16 +32,15 @@ public class AuthActivity extends Activity {
     private TextView authMessage;
     private TextView primaryButton;
     private TextView googleButton;
-    private ToneGenerator toneGenerator;
     private boolean registerModeEnabled = false;
     private boolean loading = false;
+    private final Handler authHandler = new Handler(Looper.getMainLooper());
+    private int authRequestId = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auth);
-
-        toneGenerator = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
 
         authTitle = findViewById(R.id.auth_title);
         authSubtitle = findViewById(R.id.auth_subtitle);
@@ -61,26 +61,17 @@ public class AuthActivity extends Activity {
         switchMode(false);
     }
 
-    @Override
-    protected void onDestroy() {
-        if (toneGenerator != null) {
-            toneGenerator.release();
-        }
-        super.onDestroy();
-    }
-
     private void switchMode(boolean register) {
-        UiFeedback.playTing(toneGenerator);
         registerModeEnabled = register;
         displayNameInput.setVisibility(register ? View.VISIBLE : View.GONE);
-        authTitle.setText(register ? "Tao tai khoan GymRank" : "Chao mung tro lai");
+        authTitle.setText(register ? "Tạo tài khoản GymRank" : "Chào mừng trở lại");
         authSubtitle.setText(register
-                ? "Tao tai khoan de bat dau luu level, rank va streak."
-                : "Dang nhap de tiep tuc hanh trinh tap luyen cua ban.");
-        primaryButton.setText(register ? "Dang ky" : "Dang nhap");
+                ? "Tạo tài khoản để bắt đầu lưu level, rank và chuỗi tập."
+                : "Đăng nhập để tiếp tục hành trình tập luyện của bạn.");
+        primaryButton.setText(register ? "Đăng ký" : "Đăng nhập");
         authMessage.setText(register
-                ? "Ban co the dung email that de sau nay nang cap len database online va Google login."
-                : "Backend local can dang chay tren laptop va dien thoai phai cung mang Wi-Fi.");
+                ? "Bạn có thể dùng email thật để đồng bộ hồ sơ và tiến trình tập luyện."
+                : "Hãy đăng nhập hoặc tạo tài khoản để tiếp tục.");
 
         loginMode.setBackgroundResource(register ? R.drawable.bg_segment_normal : R.drawable.bg_segment_selected);
         registerMode.setBackgroundResource(register ? R.drawable.bg_segment_selected : R.drawable.bg_segment_normal);
@@ -93,36 +84,45 @@ public class AuthActivity extends Activity {
             return;
         }
 
-        UiFeedback.playTing(toneGenerator);
         String displayName = displayNameInput.getText().toString().trim();
         String email = emailInput.getText().toString().trim();
         String password = passwordInput.getText().toString();
 
         if (registerModeEnabled && displayName.length() < 2) {
-            showMessage("Ten hien thi can it nhat 2 ky tu.");
+            showMessage("Tên hiển thị cần ít nhất 2 ký tự.");
             return;
         }
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            showMessage("Email chua dung dinh dang.");
+            showMessage("Email chưa đúng định dạng.");
             return;
         }
         if (password.length() < 6) {
-            showMessage("Mat khau can it nhat 6 ky tu.");
+            showMessage("Mật khẩu cần ít nhất 6 ký tự.");
             return;
         }
 
+        int requestId = ++authRequestId;
         setLoading(true);
+        showMessage("Đang kết nối máy chủ. Nếu server vừa ngủ, lần đầu có thể mất khoảng 1 phút.");
+        scheduleAuthTimeout(requestId);
+
         AuthApiClient.Callback callback = new AuthApiClient.Callback() {
             @Override
             public void onSuccess(AuthApiClient.Result result) {
-                runOnUiThread(() -> handleSuccess(result));
+                runOnUiThread(() -> {
+                    if (requestId == authRequestId) {
+                        handleSuccess(result);
+                    }
+                });
             }
 
             @Override
             public void onError(String message) {
                 runOnUiThread(() -> {
-                    setLoading(false);
-                    showMessage(message);
+                    if (requestId == authRequestId) {
+                        setLoading(false);
+                        showMessage(message);
+                    }
                 });
             }
         };
@@ -143,7 +143,6 @@ public class AuthActivity extends Activity {
                 result.getEmail(),
                 result.getToken()
         );
-        UiFeedback.playTing(toneGenerator);
 
         Class<?> nextScreen = result.isNewUser() || !ProfileStore.isCompleted(this)
                 ? OnboardingActivity.class
@@ -152,13 +151,23 @@ public class AuthActivity extends Activity {
         finish();
     }
 
+    private void scheduleAuthTimeout(int requestId) {
+        authHandler.postDelayed(() -> {
+            if (loading && requestId == authRequestId) {
+                authRequestId++;
+                setLoading(false);
+                showMessage("Kết nối quá lâu. Hãy kiểm tra mạng hoặc thử lại sau ít phút.");
+            }
+        }, ApiConfig.NETWORK_TIMEOUT_MS + 5000L);
+    }
+
     private void setLoading(boolean value) {
         loading = value;
         primaryButton.setEnabled(!value);
         primaryButton.setAlpha(value ? 0.6f : 1f);
         primaryButton.setText(value
-                ? "Dang xu ly..."
-                : registerModeEnabled ? "Dang ky" : "Dang nhap");
+                ? "Đang xử lý..."
+                : registerModeEnabled ? "Đăng ký" : "Đăng nhập");
     }
 
     private void showMessage(String message) {
@@ -166,7 +175,12 @@ public class AuthActivity extends Activity {
     }
 
     private void showGoogleNotice() {
-        UiFeedback.playTing(toneGenerator);
-        Toast.makeText(this, "Google login lam duoc, nhung can cau hinh OAuth/Firebase sau.", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Đăng nhập bằng Google sẽ được cấu hình ở bước sau.", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        authHandler.removeCallbacksAndMessages(null);
+        super.onDestroy();
     }
 }

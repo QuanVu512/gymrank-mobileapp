@@ -34,7 +34,7 @@ public final class AuthStore {
     }
 
     public static String getDisplayName(Context context) {
-        return prefs(context).getString(KEY_DISPLAY_NAME, "Ban");
+        return prefs(context).getString(KEY_DISPLAY_NAME, "Bạn");
     }
 
     public static String getEmail(Context context) {

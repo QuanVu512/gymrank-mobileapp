@@ -3,8 +3,7 @@ package com.gymrank.app.ui.onboarding;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioManager;
-import android.media.ToneGenerator;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -35,7 +34,7 @@ public class OnboardingActivity extends Activity {
     private TextView helperText;
     private TextView nextButton;
 
-    private ToneGenerator toneGenerator;
+    private MediaPlayer answerPlayer;
     private final Map<String, String> draftProfile = new HashMap<>();
     private int onboardingStep = 0;
     private String selectedValue = "";
@@ -45,7 +44,10 @@ public class OnboardingActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_onboarding);
 
-        toneGenerator = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
+        answerPlayer = MediaPlayer.create(this, R.raw.freesound_community_ding2_89720);
+        if (answerPlayer != null) {
+            answerPlayer.setVolume(2f, 2f);
+        }
 
         backButton = findViewById(R.id.back_button);
         onboardingProgress = findViewById(R.id.onboarding_progress);
@@ -57,7 +59,10 @@ public class OnboardingActivity extends Activity {
         nextButton = findViewById(R.id.next_button);
 
         backButton.setOnClickListener(v -> UiFeedback.animatePress(v, this::goBack));
-        nextButton.setOnClickListener(v -> UiFeedback.animateContinue(v, this::goNext));
+        nextButton.setOnClickListener(v -> UiFeedback.animateContinue(v, () -> {
+            playAnswerTing();
+            goNext();
+        }));
         nameInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -78,8 +83,9 @@ public class OnboardingActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        if (toneGenerator != null) {
-            toneGenerator.release();
+        if (answerPlayer != null) {
+            answerPlayer.release();
+            answerPlayer = null;
         }
         super.onDestroy();
     }
@@ -98,9 +104,9 @@ public class OnboardingActivity extends Activity {
 
         switch (onboardingStep) {
             case 0:
-                coachText.setText("Chao ban, minh se hoi that ngan de tao lich tap phu hop.");
-                questionTitle.setText("Minh nen goi ban la gi?");
-                helperText.setText("Ten nay se hien o trang Home. Ban co the doi sau.");
+                coachText.setText("Chào bạn, mình sẽ hỏi thật ngắn để tạo lịch tập phù hợp.");
+                questionTitle.setText("Mình nên gọi bạn là gì?");
+                helperText.setText("Tên này sẽ hiển thị ở trang chính. Bạn có thể đổi sau.");
                 nameInput.setVisibility(View.VISIBLE);
                 nameInput.setText(draftProfile.getOrDefault(ProfileStore.KEY_NAME, ""));
                 nameInput.requestFocus();
@@ -108,40 +114,40 @@ public class OnboardingActivity extends Activity {
                 break;
             case 1:
                 hideKeyboard();
-                coachText.setText("Tot roi. Muc nay giup app goi y bai tap an toan hon.");
-                questionTitle.setText("Kinh nghiem tap cua ban?");
-                helperText.setText("Hay chon muc gan voi hien tai nhat.");
-                addOption("Chua tung tap", "Can lich that nhe, uu tien an toan.", "NEVER");
-                addOption("Moi bat dau", "Da thu tap mot vai lan.", "BEGINNER");
-                addOption("Tap deu", "Tap kha thuong xuyen.", "INTERMEDIATE");
-                addOption("Nhieu kinh nghiem", "Biet ro bai tap va ky thuat.", "ADVANCED");
+                coachText.setText("Tốt rồi. Mục này giúp app gợi ý bài tập an toàn hơn.");
+                questionTitle.setText("Kinh nghiệm tập của bạn?");
+                helperText.setText("Hãy chọn mức gần với hiện tại nhất.");
+                addOption("Chưa từng tập", "Cần lịch thật nhẹ, ưu tiên an toàn.", "NEVER");
+                addOption("Mới bắt đầu", "Đã thử tập một vài lần.", "BEGINNER");
+                addOption("Tập đều", "Tập khá thường xuyên.", "INTERMEDIATE");
+                addOption("Nhiều kinh nghiệm", "Biết rõ bài tập và kỹ thuật.", "ADVANCED");
                 break;
             case 2:
-                coachText.setText("Muc tieu se quyet dinh app uu tien EXP hay Rank Point.");
-                questionTitle.setText("Muc tieu chinh cua ban?");
-                helperText.setText("Chi can chon mot muc chinh cho giai doan dau.");
-                addOption("Tang co", "Uu tien rank nhom co va suc manh.", "BUILD_MUSCLE");
-                addOption("Giam mo", "Uu tien van dong deu va cardio.", "LOSE_WEIGHT");
-                addOption("Khoe hon", "Can bang co, tim mach va thoi quen.", "GET_STRONGER");
-                addOption("Giu thoi quen", "Tap du 3 buoi moi tuan.", "CONSISTENT");
-                addOption("Cay rank", "Tap theo he rank va bodygraph.", "RANK");
+                coachText.setText("Mục tiêu sẽ quyết định app ưu tiên EXP hay Rank Point.");
+                questionTitle.setText("Mục tiêu chính của bạn?");
+                helperText.setText("Chỉ cần chọn một mục chính cho giai đoạn đầu.");
+                addOption("Tăng cơ", "Ưu tiên rank nhóm cơ và sức mạnh.", "BUILD_MUSCLE");
+                addOption("Giảm mỡ", "Ưu tiên vận động đều và cardio.", "LOSE_WEIGHT");
+                addOption("Khỏe hơn", "Cân bằng cơ, tim mạch và thói quen.", "GET_STRONGER");
+                addOption("Giữ thói quen", "Tập đủ 3 buổi mỗi tuần.", "CONSISTENT");
+                addOption("Cày rank", "Tập theo hệ rank và bodygraph.", "RANK");
                 break;
             case 3:
-                coachText.setText("Dung ep qua suc. Lich tot la lich ban giu duoc.");
-                questionTitle.setText("Ban co the tap may buoi moi tuan?");
-                helperText.setText("Streak MVP se giu khi du 3 buoi trong tuan.");
-                addOption("2 buoi", "Nhe, hop voi nguoi rat ban.", "2");
-                addOption("3 buoi", "Khuyen nghi de giu streak.", "3");
-                addOption("4 buoi", "Tot neu ban da quen van dong.", "4");
-                addOption("5+ buoi", "Can lich chia nhom co can than.", "5");
+                coachText.setText("Đừng ép quá sức. Lịch tốt là lịch bạn giữ được.");
+                questionTitle.setText("Bạn có thể tập mấy buổi mỗi tuần?");
+                helperText.setText("Chuỗi MVP sẽ giữ khi đủ 3 buổi trong tuần.");
+                addOption("2 buổi", "Nhẹ, hợp với người rất bận.", "2");
+                addOption("3 buổi", "Khuyến nghị để giữ chuỗi.", "3");
+                addOption("4 buổi", "Tốt nếu bạn đã quen vận động.", "4");
+                addOption("5+ buổi", "Cần lịch chia nhóm cơ cẩn thận.", "5");
                 break;
             case 4:
-                coachText.setText("Buoc cuoi de app hien bodygraph phu hop hon.");
-                questionTitle.setText("Mau bodygraph ban muon dung?");
-                helperText.setText("Lua chon nay chi de hien thi co the.");
-                addOption("Nam", "Dung bodygraph nam.", "MALE");
-                addOption("Nu", "Dung bodygraph nu.", "FEMALE");
-                addOption("Chon sau", "Vao app truoc, cap nhat sau.", "SKIP");
+                coachText.setText("Bước cuối để app hiển thị bodygraph phù hợp hơn.");
+                questionTitle.setText("Mẫu bodygraph bạn muốn dùng?");
+                helperText.setText("Lựa chọn này chỉ để hiển thị cơ thể.");
+                addOption("Nam", "Dùng bodygraph nam.", "MALE");
+                addOption("Nữ", "Dùng bodygraph nữ.", "FEMALE");
+                addOption("Chọn sau", "Vào app trước, cập nhật sau.", "SKIP");
                 break;
             default:
                 finishOnboarding();
@@ -188,7 +194,6 @@ public class OnboardingActivity extends Activity {
         setNextEnabled(true);
 
         if (playFeedback) {
-            UiFeedback.playTing(toneGenerator);
             UiFeedback.animatePress(option, () -> {
             });
         }
@@ -205,7 +210,6 @@ public class OnboardingActivity extends Activity {
     }
 
     private void goBack() {
-        UiFeedback.playTing(toneGenerator);
         if (onboardingStep > 0) {
             onboardingStep--;
             showStep();
@@ -213,7 +217,6 @@ public class OnboardingActivity extends Activity {
     }
 
     private void goNext() {
-        UiFeedback.playTing(toneGenerator);
         if (onboardingStep == 0) {
             String name = nameInput.getText().toString().trim();
             if (name.length() < 2) {
@@ -262,6 +265,20 @@ public class OnboardingActivity extends Activity {
         View current = getCurrentFocus();
         if (imm != null && current != null) {
             imm.hideSoftInputFromWindow(current.getWindowToken(), 0);
+        }
+    }
+
+    private void playAnswerTing() {
+        if (answerPlayer == null) {
+            return;
+        }
+        try {
+            if (answerPlayer.isPlaying()) {
+                answerPlayer.pause();
+            }
+            answerPlayer.seekTo(0);
+            answerPlayer.start();
+        } catch (IllegalStateException ignored) {
         }
     }
 

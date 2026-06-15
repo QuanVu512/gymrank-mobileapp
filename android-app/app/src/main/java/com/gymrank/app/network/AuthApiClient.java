@@ -65,7 +65,7 @@ public final class AuthApiClient {
                         response.optBoolean("newUser")
                 ));
             } catch (Exception exception) {
-                callback.onError("Khong ket noi duoc backend. Hay kiem tra Wi-Fi, IP laptop va Spring Boot.");
+                callback.onError("Không kết nối được backend. Hãy kiểm tra mạng và thử lại.");
             } finally {
                 if (connection != null) {
                     connection.disconnect();
@@ -100,7 +100,7 @@ public final class AuthApiClient {
             }
         } catch (Exception ignored) {
         }
-        return "Dang nhap that bai. Ma loi: " + statusCode;
+        return "Đăng nhập thất bại. Mã lỗi: " + statusCode;
     }
 
     public interface Callback {

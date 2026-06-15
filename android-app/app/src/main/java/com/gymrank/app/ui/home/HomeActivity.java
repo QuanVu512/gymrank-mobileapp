@@ -2,136 +2,302 @@ package com.gymrank.app.ui.home;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.media.AudioManager;
-import android.media.ToneGenerator;
 import android.os.Bundle;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.gymrank.app.R;
 import com.gymrank.app.data.AuthStore;
+import com.gymrank.app.data.MuscleRankStore;
 import com.gymrank.app.data.ProfileStore;
-import com.gymrank.app.ui.common.UiFeedback;
 import com.gymrank.app.ui.auth.AuthActivity;
+import com.gymrank.app.ui.common.UiFeedback;
+import com.gymrank.app.ui.workout.WorkoutExercise;
+import com.gymrank.app.ui.workout.WorkoutExerciseAdapter;
 
-public class HomeActivity extends Activity {
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
-    private TextView screenTitle;
-    private TextView screenSubtitle;
-    private TextView primaryAction;
+public class HomeActivity extends Activity implements WorkoutExerciseAdapter.OnWorkoutSaved {
+
+    private View homeScreen;
+    private View workoutScreen;
+    private View bodyScreen;
+    private View profileScreen;
     private TextView homeName;
     private TextView homeGoal;
-    private TextView streakValue;
+    private TextView homeHint;
     private TextView expValue;
     private TextView rankValue;
+    private TextView homeAction;
+    private TextView workoutAction;
+    private TextView workoutIntro;
+    private TextView bodygraphStatus;
+    private TextView profileEmail;
+    private TextView profileLogoutButton;
+    private TextView tabHome;
+    private TextView tabWorkout;
+    private TextView tabBody;
+    private TextView tabProfile;
     private ProgressBar expProgress;
-    private ToneGenerator toneGenerator;
-
-    private int streak = 2;
-    private int exp = 620;
-    private int rankPoint = 410;
+    private ListView workoutList;
+    private WorkoutExerciseAdapter workoutAdapter;
+    private final Map<String, ImageView> muscleOverlays = new LinkedHashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        toneGenerator = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
+        homeScreen = findViewById(R.id.home_screen);
+        workoutScreen = findViewById(R.id.workout_screen);
+        bodyScreen = findViewById(R.id.body_screen);
+        profileScreen = findViewById(R.id.profile_screen);
 
-        screenTitle = findViewById(R.id.screen_title);
-        screenSubtitle = findViewById(R.id.screen_subtitle);
-        primaryAction = findViewById(R.id.primary_action);
         homeName = findViewById(R.id.home_name);
         homeGoal = findViewById(R.id.home_goal);
-        streakValue = findViewById(R.id.streak_value);
+        homeHint = findViewById(R.id.home_hint);
         expValue = findViewById(R.id.exp_value);
         rankValue = findViewById(R.id.rank_value);
+        homeAction = findViewById(R.id.home_primary_action);
+        workoutAction = findViewById(R.id.workout_primary_action);
+        workoutIntro = findViewById(R.id.workout_intro);
+        workoutList = findViewById(R.id.workout_list);
+        bodygraphStatus = findViewById(R.id.bodygraph_status);
+        profileEmail = findViewById(R.id.profile_email);
+        profileLogoutButton = findViewById(R.id.profile_logout_button);
+        tabHome = findViewById(R.id.tab_home);
+        tabWorkout = findViewById(R.id.tab_workout);
+        tabBody = findViewById(R.id.tab_body);
+        tabProfile = findViewById(R.id.tab_profile);
         expProgress = findViewById(R.id.exp_progress);
 
-        findViewById(R.id.tab_today).setOnClickListener(v -> UiFeedback.animatePress(v, this::showToday));
-        findViewById(R.id.tab_workout).setOnClickListener(v -> UiFeedback.animatePress(v, this::showWorkout));
-        findViewById(R.id.tab_body).setOnClickListener(v -> UiFeedback.animatePress(v, this::showBody));
-        findViewById(R.id.tab_profile).setOnClickListener(v -> UiFeedback.animatePress(v, this::showProfile));
+        setupWorkoutList();
+        setupBodygraphOverlays();
+
+        tabHome.setOnClickListener(v -> UiFeedback.animatePress(v, this::showHome));
+        tabWorkout.setOnClickListener(v -> UiFeedback.animatePress(v, this::showWorkout));
+        tabBody.setOnClickListener(v -> UiFeedback.animatePress(v, this::showBody));
+        tabProfile.setOnClickListener(v -> UiFeedback.animatePress(v, this::showProfile));
+        homeAction.setOnClickListener(v -> UiFeedback.animatePress(v, this::createStarterWorkout));
+        workoutAction.setOnClickListener(v -> UiFeedback.animatePress(v, this::createStarterWorkout));
+        profileLogoutButton.setOnClickListener(v -> UiFeedback.animatePress(v, this::logout));
 
         refreshStats();
-        showToday();
+        updateWorkoutUi();
+        updateBodygraph();
+        showHome();
     }
 
-    @Override
-    protected void onDestroy() {
-        if (toneGenerator != null) {
-            toneGenerator.release();
-        }
-        super.onDestroy();
+    private void setupWorkoutList() {
+        List<WorkoutExercise> exercises = new ArrayList<>();
+        exercises.add(WorkoutExercise.chestPress());
+        exercises.add(WorkoutExercise.legPress());
+        exercises.add(WorkoutExercise.latPullDown());
+        workoutAdapter = new WorkoutExerciseAdapter(this, exercises, this);
+        workoutList.setAdapter(workoutAdapter);
     }
 
-    private void showToday() {
-        UiFeedback.playTing(toneGenerator);
-        primaryAction.setOnClickListener(v -> UiFeedback.animatePress(v, this::completeDemoWorkout));
-        screenTitle.setText("Hom nay");
-        String days = ProfileStore.getTrainingDays(this);
-        screenSubtitle.setText("Lich goi y: " + days + " buoi moi tuan. Hom nay nen tap full body nhe de giu nhip.");
-        primaryAction.setText("Bat dau buoi tap");
+    private void setupBodygraphOverlays() {
+        FrameLayout front = findViewById(R.id.bodygraph_front_container);
+        FrameLayout back = findViewById(R.id.bodygraph_back_container);
+
+        addOverlay(front, "chest", R.drawable.bodygraph_overlay_front_chest);
+        addOverlay(front, "deltoids", R.drawable.bodygraph_overlay_front_deltoids);
+        addOverlay(front, "triceps", R.drawable.bodygraph_overlay_front_triceps);
+        addOverlay(front, "quadriceps", R.drawable.bodygraph_overlay_front_quadriceps);
+        addOverlay(front, "biceps", R.drawable.bodygraph_overlay_front_biceps);
+        addOverlay(back, "upper-back", R.drawable.bodygraph_overlay_back_upper_back);
+        addOverlay(back, "trapezius", R.drawable.bodygraph_overlay_back_trapezius);
+    }
+
+    private void addOverlay(FrameLayout container, String muscle, int drawableRes) {
+        ImageView overlay = new ImageView(this);
+        overlay.setImageResource(drawableRes);
+        overlay.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        overlay.setAdjustViewBounds(true);
+        overlay.setVisibility(View.GONE);
+        container.addView(overlay, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        ));
+        overlay.bringToFront();
+        muscleOverlays.put(muscle, overlay);
+    }
+
+    private void createStarterWorkout() {
+        MuscleRankStore.enableStarterWorkout(this);
+        updateWorkoutUi();
+        showWorkout();
+    }
+
+    private void showHome() {
+        showScreen(homeScreen, tabHome);
     }
 
     private void showWorkout() {
-        UiFeedback.playTing(toneGenerator);
-        primaryAction.setOnClickListener(v -> UiFeedback.animatePress(v, () -> UiFeedback.playTing(toneGenerator)));
-        screenTitle.setText("Tap luyen");
-        screenSubtitle.setText("Routine dau tien: hit dat, squat khong ta, plank. Se them tracker set/rep o buoc sau.");
-        primaryAction.setText("Tao routine");
+        showScreen(workoutScreen, tabWorkout);
     }
 
     private void showBody() {
-        UiFeedback.playTing(toneGenerator);
-        primaryAction.setOnClickListener(v -> UiFeedback.animatePress(v, () -> UiFeedback.playTing(toneGenerator)));
-        screenTitle.setText("Bodygraph");
-        screenSubtitle.setText("Bodygraph se to mau theo rank nhom co. Hien tai dang o che do demo.");
-        primaryAction.setText("Xem nhom co");
+        showScreen(bodyScreen, tabBody);
     }
 
     private void showProfile() {
-        UiFeedback.playTing(toneGenerator);
-        primaryAction.setOnClickListener(v -> UiFeedback.animatePress(v, this::logout));
-        screenTitle.setText("Ho so");
-        screenSubtitle.setText("Email: " + AuthStore.getEmail(this) + "\nHo so da dong bo theo userId local. Database online se lam o buoc sau.");
-        primaryAction.setText("Dang xuat");
-    }
-
-    private void completeDemoWorkout() {
-        UiFeedback.playTing(toneGenerator);
-        streak += 1;
-        exp += 80;
-        rankPoint += 45;
-        refreshStats();
-        screenTitle.setText("Da ghi buoi tap");
-        screenSubtitle.setText("Cong 80 EXP va 45 Rank Point. Tiep tuc giu nhip 3 buoi moi tuan.");
-        primaryAction.setText("Ghi them buoi tap");
+        showScreen(profileScreen, tabProfile);
     }
 
     private void refreshStats() {
-        homeName.setText("Chao, " + ProfileStore.getName(this));
-        homeGoal.setText("Muc tieu: " + readableGoal(ProfileStore.getGoal(this)));
-        streakValue.setText(String.valueOf(streak));
+        String days = ProfileStore.getTrainingDays(this);
+        int exp = MuscleRankStore.getExp(this);
+        float rankPoint = MuscleRankStore.getRankPoints(this);
+        homeName.setText("Chào, " + ProfileStore.getName(this));
+        homeGoal.setText("Mục tiêu: " + readableGoal(ProfileStore.getGoal(this)));
+        homeHint.setText("Bạn đặt mục tiêu " + days + " buổi mỗi tuần. Hãy tạo lịch tập đầu tiên để bắt đầu tính EXP, rank và bodygraph.");
         expValue.setText(exp + " / 1000");
-        rankValue.setText(rankPoint + " RP");
+        rankValue.setText(String.format(Locale.US, "%.1f RP", rankPoint));
         expProgress.setProgress(Math.min(exp, 1000));
+        profileEmail.setText("Email: " + AuthStore.getEmail(this));
+    }
+
+    private void updateWorkoutUi() {
+        boolean hasStarterWorkout = MuscleRankStore.hasStarterWorkout(this);
+        workoutAction.setVisibility(hasStarterWorkout ? View.GONE : View.VISIBLE);
+        workoutList.setVisibility(hasStarterWorkout ? View.VISIBLE : View.GONE);
+        workoutIntro.setText(hasStarterWorkout
+                ? "Nhập kết quả từng bài để kiểm tra cách EXP, rank và bodygraph đổi màu."
+                : "Tạo lịch tập để mở 3 bài cơ bản và thử hệ thống tính rank theo nhóm cơ.");
+        workoutList.post(this::updateWorkoutListHeight);
+    }
+
+    private void updateBodygraph() {
+        for (Map.Entry<String, ImageView> entry : muscleOverlays.entrySet()) {
+            MuscleRankStore.Rank rank = MuscleRankStore.rankFor(this, entry.getKey());
+            ImageView overlay = entry.getValue();
+            overlay.setVisibility(rank == MuscleRankStore.Rank.NONE ? View.GONE : View.VISIBLE);
+            overlay.setColorFilter(rank.color);
+        }
+
+        Map<String, Float> activeMuscles = MuscleRankStore.knownMusclePoints(this);
+        bodygraphStatus.setText(activeMuscles.isEmpty()
+                ? "Chưa có dữ liệu rank"
+                : "Đang có điểm: " + activeMuscleSummary(activeMuscles));
+    }
+
+    private void updateWorkoutListHeight() {
+        ListAdapter adapter = workoutList.getAdapter();
+        if (adapter == null || adapter.getCount() == 0 || workoutList.getVisibility() != View.VISIBLE) {
+            return;
+        }
+
+        int width = getResources().getDisplayMetrics().widthPixels - dp(40);
+        int widthSpec = View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.AT_MOST);
+        int totalHeight = 0;
+        for (int i = 0; i < adapter.getCount(); i++) {
+            View item = adapter.getView(i, null, workoutList);
+            item.measure(widthSpec, View.MeasureSpec.UNSPECIFIED);
+            totalHeight += item.getMeasuredHeight();
+        }
+
+        ViewGroup.LayoutParams params = workoutList.getLayoutParams();
+        params.height = totalHeight + workoutList.getDividerHeight() * Math.max(0, adapter.getCount() - 1);
+        workoutList.setLayoutParams(params);
+        workoutList.requestLayout();
+    }
+
+    @Override
+    public void onWorkoutSaved(WorkoutExercise exercise, float rankGain, int expGain, boolean cheatLike) {
+        MuscleRankStore.addExp(this, expGain);
+        if (!cheatLike) {
+            for (Map.Entry<String, Float> target : exercise.muscleWeights.entrySet()) {
+                MuscleRankStore.addMusclePoints(this, target.getKey(), rankGain * target.getValue());
+            }
+        }
+
+        refreshStats();
+        updateBodygraph();
+        Toast.makeText(this, cheatLike ? "Đã cộng EXP nhẹ, không cộng rank." : "Đã cộng rank cho nhóm cơ.", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onListHeightChanged() {
+        workoutList.post(this::updateWorkoutListHeight);
+    }
+
+    private void showScreen(View selectedScreen, TextView selectedTab) {
+        homeScreen.setVisibility(selectedScreen == homeScreen ? View.VISIBLE : View.GONE);
+        workoutScreen.setVisibility(selectedScreen == workoutScreen ? View.VISIBLE : View.GONE);
+        bodyScreen.setVisibility(selectedScreen == bodyScreen ? View.VISIBLE : View.GONE);
+        profileScreen.setVisibility(selectedScreen == profileScreen ? View.VISIBLE : View.GONE);
+        selectBottomTab(selectedTab);
+    }
+
+    private void selectBottomTab(TextView selectedTab) {
+        TextView[] tabs = {tabHome, tabWorkout, tabBody, tabProfile};
+        for (TextView tab : tabs) {
+            boolean selected = tab == selectedTab;
+            tab.setBackgroundResource(selected ? R.drawable.bg_bottom_nav_item_selected : 0);
+            tab.setTextColor(getColor(selected ? R.color.gr_background : R.color.gr_text_muted));
+            tab.setAlpha(selected ? 1f : 0.82f);
+        }
     }
 
     private String readableGoal(String goal) {
         return switch (goal) {
-            case "BUILD_MUSCLE" -> "Tang co";
-            case "LOSE_WEIGHT" -> "Giam mo";
-            case "GET_STRONGER" -> "Khoe hon";
-            case "RANK" -> "Cay rank";
-            default -> "Giu thoi quen";
+            case "BUILD_MUSCLE" -> "Tăng cơ";
+            case "LOSE_WEIGHT" -> "Giảm mỡ";
+            case "GET_STRONGER" -> "Khỏe hơn";
+            case "RANK" -> "Cày rank";
+            default -> "Giữ thói quen";
         };
     }
 
+    private String activeMuscleSummary(Map<String, Float> muscles) {
+        StringBuilder summary = new StringBuilder();
+        int count = 0;
+        for (Map.Entry<String, Float> muscle : muscles.entrySet()) {
+            if (count > 0) {
+                summary.append(", ");
+            }
+            summary.append(readableMuscle(muscle.getKey()))
+                    .append(" ")
+                    .append(String.format(Locale.US, "%.1f", muscle.getValue()));
+            count++;
+        }
+        return summary.toString();
+    }
+
+    private String readableMuscle(String muscle) {
+        return switch (muscle) {
+            case "chest" -> "Ngực";
+            case "deltoids" -> "Vai";
+            case "triceps" -> "Tay sau";
+            case "quadriceps" -> "Đùi trước";
+            case "biceps" -> "Tay trước";
+            case "upper-back" -> "Lưng trên";
+            case "trapezius" -> "Trap";
+            default -> muscle;
+        };
+    }
+
+    private int dp(int value) {
+        return (int) (value * getResources().getDisplayMetrics().density + 0.5f);
+    }
+
     private void logout() {
-        UiFeedback.playTing(toneGenerator);
         AuthStore.clear(this);
         ProfileStore.clear(this);
+        MuscleRankStore.clear(this);
         startActivity(new Intent(this, AuthActivity.class));
         finish();
     }

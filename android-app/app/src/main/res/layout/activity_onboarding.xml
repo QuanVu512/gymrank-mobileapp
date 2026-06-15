@@ -79,7 +79,7 @@
                     android:paddingTop="14dp"
                     android:paddingRight="18dp"
                     android:paddingBottom="14dp"
-                    android:text="Chao ban."
+                    android:text="Chào bạn."
                     android:textColor="@color/gr_text"
                     android:textSize="16sp" />
             </LinearLayout>
@@ -89,7 +89,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="34dp"
-                android:text="Minh nen goi ban la gi?"
+                android:text="Mình nên gọi bạn là gì?"
                 android:textColor="@color/gr_text"
                 android:textSize="30sp"
                 android:textStyle="bold" />
@@ -100,7 +100,7 @@
                 android:layout_height="62dp"
                 android:layout_marginTop="22dp"
                 android:background="@drawable/bg_input"
-                android:hint="Nhap ten cua ban"
+                android:hint="Nhập tên của bạn"
                 android:inputType="textPersonName"
                 android:maxLines="1"
                 android:paddingLeft="18dp"
@@ -124,7 +124,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="18dp"
                 android:gravity="center"
-                android:text="Ban co the doi sau."
+                android:text="Bạn có thể đổi sau."
                 android:textColor="@color/gr_text_dim"
                 android:textSize="15sp" />
         </LinearLayout>
@@ -139,7 +139,7 @@
         android:layout_marginBottom="24dp"
         android:background="@drawable/bg_card_blue"
         android:gravity="center"
-        android:text="Tiep tuc"
+        android:text="Tiếp tục"
         android:textColor="@color/gr_background"
         android:textSize="17sp"
         android:textStyle="bold" />

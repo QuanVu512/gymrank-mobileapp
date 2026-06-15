@@ -39,13 +39,15 @@ CREATE TABLE user_profiles (
 );
 
 CREATE TABLE onboarding_answers (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
-    question_key VARCHAR(100) NOT NULL,
-    question_version INT NOT NULL DEFAULT 1,
-    answer_value VARCHAR(255),
-    answer_text TEXT,
-    answered_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    user_id BIGINT PRIMARY KEY REFERENCES app_users(id) ON DELETE CASCADE,
+    display_name VARCHAR(120) NOT NULL,
+    experience_level VARCHAR(50) NOT NULL,
+    main_goal VARCHAR(50) NOT NULL,
+    training_days_per_week SMALLINT NOT NULL,
+    bodygraph_type VARCHAR(20) NOT NULL,
+    answered_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT chk_onboarding_answers_training_days CHECK (training_days_per_week BETWEEN 1 AND 7)
 );
 
 -- ==========================================
@@ -268,7 +270,8 @@ CREATE TABLE admin_audit_logs (
 -- Indexes
 -- ==========================================
 
-CREATE INDEX idx_onboarding_answers_question ON onboarding_answers(question_key, answer_value);
+CREATE INDEX idx_onboarding_answers_goal ON onboarding_answers(main_goal);
+CREATE INDEX idx_onboarding_answers_experience ON onboarding_answers(experience_level);
 CREATE INDEX idx_exercises_type_active ON exercises(exercise_type, active);
 CREATE INDEX idx_news_status_published ON news_articles(status, published_at DESC);
 CREATE INDEX idx_workout_sessions_user_started ON workout_sessions(user_id, started_at DESC);

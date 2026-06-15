@@ -48,10 +48,10 @@ public class GymRankController {
     @GetMapping("/exercises")
     public List<Exercise> exercises() {
         return List.of(
-                new Exercise("push_up", "Hit dat", "Chest", List.of("Triceps", "Shoulders"), true),
-                new Exercise("bodyweight_squat", "Squat khong ta", "Quads", List.of("Glutes", "Core"), true),
+                new Exercise("push_up", "Hít đất", "Chest", List.of("Triceps", "Shoulders"), true),
+                new Exercise("bodyweight_squat", "Squat không tạ", "Quads", List.of("Glutes", "Core"), true),
                 new Exercise("plank", "Plank", "Core", List.of("Shoulders"), true),
-                new Exercise("barbell_curl", "Cuon tay don", "Biceps", List.of("Forearms"), false)
+                new Exercise("barbell_curl", "Cuốn tay đòn", "Biceps", List.of("Forearms"), false)
         );
     }
 

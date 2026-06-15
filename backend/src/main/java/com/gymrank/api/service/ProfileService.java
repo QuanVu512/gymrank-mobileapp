@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -59,13 +58,16 @@ public class ProfileService {
         UserStats stats = userStatsRepository.findById(user.getId())
                 .orElseGet(() -> userStatsRepository.save(new UserStats(user)));
 
-        onboardingAnswerRepository.saveAll(List.of(
-                new OnboardingAnswer(user, "display_name", request.displayName(), request.displayName()),
-                new OnboardingAnswer(user, "experience_level", request.experienceLevel(), request.experienceLevel()),
-                new OnboardingAnswer(user, "main_goal", request.mainGoal(), request.mainGoal()),
-                new OnboardingAnswer(user, "training_days_per_week", String.valueOf(request.trainingDaysPerWeek()), String.valueOf(request.trainingDaysPerWeek())),
-                new OnboardingAnswer(user, "bodygraph_type", request.bodygraphType(), request.bodygraphType())
-        ));
+        OnboardingAnswer onboardingAnswer = onboardingAnswerRepository.findById(user.getId())
+                .orElseGet(() -> new OnboardingAnswer(user));
+        onboardingAnswer.updateFromOnboarding(
+                request.displayName(),
+                request.experienceLevel(),
+                request.mainGoal(),
+                request.trainingDaysPerWeek(),
+                request.bodygraphType()
+        );
+        onboardingAnswerRepository.save(onboardingAnswer);
 
         return toSummary(user, profile, stats, true);
     }
@@ -96,7 +98,7 @@ public class ProfileService {
         Optional<UUID> publicId = parsePublicId(userId);
         if (publicId.isPresent()) {
             return appUserRepository.findByPublicId(publicId.get())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "User khong ton tai."));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Người dùng không tồn tại."));
         }
 
         return appUserRepository.findByEmail(LOCAL_DEMO_EMAIL)
@@ -141,7 +143,7 @@ public class ProfileService {
 
     private ProfileSummaryResponse defaultSummary() {
         return new ProfileSummaryResponse(
-                "Chua dong bo",
+                "Chưa đồng bộ",
                 "BEGINNER",
                 "CONSISTENT",
                 3,

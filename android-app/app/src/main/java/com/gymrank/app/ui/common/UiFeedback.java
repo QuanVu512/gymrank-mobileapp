@@ -1,18 +1,10 @@
 package com.gymrank.app.ui.common;
 
-import android.media.ToneGenerator;
 import android.view.View;
 
 public final class UiFeedback {
 
     private UiFeedback() {
-    }
-
-    public static void playTing(ToneGenerator toneGenerator) {
-        if (toneGenerator != null) {
-            toneGenerator.stopTone();
-            toneGenerator.startTone(ToneGenerator.TONE_PROP_PROMPT, 180);
-        }
     }
 
     public static void animatePress(View view, Runnable afterAnimation) {

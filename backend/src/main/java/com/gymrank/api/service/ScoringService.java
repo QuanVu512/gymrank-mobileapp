@@ -13,8 +13,8 @@ public class ScoringService {
         int rankPoints = calculateRankPoints(request);
         boolean streakKept = request.sessionsThisWeek() >= 3;
         String note = streakKept
-                ? "Tuan nay du 3 buoi, streak duoc giu."
-                : "Can du 3 buoi trong tuan de giu streak.";
+                ? "Tuần này đủ 3 buổi, chuỗi được giữ."
+                : "Cần đủ 3 buổi trong tuần để giữ chuỗi.";
 
         return new WorkoutScoreResponse(exp, rankPoints, streakKept, note);
     }

@@ -25,7 +25,7 @@ public final class ProfileStore {
     public static void saveProfile(Context context, Map<String, String> profile) {
         prefs(context).edit()
                 .putBoolean(KEY_COMPLETED, true)
-                .putString(KEY_NAME, profile.getOrDefault(KEY_NAME, "Ban"))
+                .putString(KEY_NAME, profile.getOrDefault(KEY_NAME, "Bạn"))
                 .putString(KEY_EXPERIENCE, profile.getOrDefault(KEY_EXPERIENCE, "BEGINNER"))
                 .putString(KEY_GOAL, profile.getOrDefault(KEY_GOAL, "CONSISTENT"))
                 .putString(KEY_DAYS, profile.getOrDefault(KEY_DAYS, "3"))
@@ -34,7 +34,7 @@ public final class ProfileStore {
     }
 
     public static String getName(Context context) {
-        return prefs(context).getString(KEY_NAME, "Ban");
+        return prefs(context).getString(KEY_NAME, "Bạn");
     }
 
     public static String getGoal(Context context) {

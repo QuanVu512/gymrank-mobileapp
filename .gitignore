@@ -6,6 +6,8 @@
 .gradle/
 build/
 **/build/
+build-root/
+**/build-root/
 
 # Android
 local.properties

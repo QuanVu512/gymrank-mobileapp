@@ -35,7 +35,7 @@ public class AuthService {
         String displayName = cleanDisplayName(request.displayName(), email);
 
         if (appUserRepository.existsByEmail(email)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email da duoc dang ky.");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email đã được đăng ký.");
         }
 
         AppUser user = appUserRepository.save(new AppUser(email, createPasswordHash(request.password()), displayName));
@@ -48,10 +48,10 @@ public class AuthService {
     public AuthResponse login(AuthRequest request) {
         String email = normalizeEmail(request.email());
         AppUser user = appUserRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Email hoac mat khau khong dung."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Email hoặc mật khẩu không đúng."));
 
         if (!isPasswordValid(user.getPasswordHash(), request.password())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Email hoac mat khau khong dung.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Email hoặc mật khẩu không đúng.");
         }
 
         user.markLoggedIn();

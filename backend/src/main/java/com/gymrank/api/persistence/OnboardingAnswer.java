@@ -3,12 +3,12 @@ package com.gymrank.api.persistence;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapsId;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 import java.time.Instant;
@@ -18,40 +18,65 @@ import java.time.Instant;
 public class OnboardingAnswer {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "user_id")
+    private Long userId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
+    @MapsId
     @JoinColumn(name = "user_id", nullable = false)
     private AppUser user;
 
-    @Column(name = "question_key", nullable = false)
-    private String questionKey;
+    @Column(name = "display_name", nullable = false)
+    private String displayName;
 
-    @Column(name = "question_version", nullable = false)
-    private int questionVersion = 1;
+    @Column(name = "experience_level", nullable = false)
+    private String experienceLevel;
 
-    @Column(name = "answer_value")
-    private String answerValue;
+    @Column(name = "main_goal", nullable = false)
+    private String mainGoal;
 
-    @Column(name = "answer_text")
-    private String answerText;
+    @Column(name = "training_days_per_week", nullable = false)
+    private int trainingDaysPerWeek;
+
+    @Column(name = "bodygraph_type", nullable = false)
+    private String bodygraphType;
 
     @Column(name = "answered_at", nullable = false)
     private Instant answeredAt;
 
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
+
     protected OnboardingAnswer() {
     }
 
-    public OnboardingAnswer(AppUser user, String questionKey, String answerValue, String answerText) {
+    public OnboardingAnswer(AppUser user) {
         this.user = user;
-        this.questionKey = questionKey;
-        this.answerValue = answerValue;
-        this.answerText = answerText;
     }
 
     @PrePersist
     void onCreate() {
-        answeredAt = Instant.now();
+        Instant now = Instant.now();
+        answeredAt = now;
+        updatedAt = now;
+    }
+
+    @PreUpdate
+    void onUpdate() {
+        updatedAt = Instant.now();
+    }
+
+    public void updateFromOnboarding(
+            String displayName,
+            String experienceLevel,
+            String mainGoal,
+            int trainingDaysPerWeek,
+            String bodygraphType
+    ) {
+        this.displayName = displayName;
+        this.experienceLevel = experienceLevel;
+        this.mainGoal = mainGoal;
+        this.trainingDaysPerWeek = trainingDaysPerWeek;
+        this.bodygraphType = bodygraphType;
     }
 }

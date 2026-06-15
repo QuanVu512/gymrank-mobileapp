@@ -1,0 +1,153 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_card"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/exercise_header"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/exercise_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Chest Press"
+                android:textColor="@color/gr_text"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/exercise_muscles"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:text="Ngực, vai, tay sau"
+                android:textColor="@color/gr_text_muted"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/exercise_arrow"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:gravity="center"
+            android:text="⌄"
+            android:textColor="@color/gr_blue"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/exercise_detail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/exercise_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:lineSpacingExtra="3dp"
+            android:text="Nhập số reps, set và khối lượng để lưu tiến độ."
+            android:textColor="@color/gr_text_muted"
+            android:textSize="14sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/input_reps"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_input"
+                android:hint="reps"
+                android:inputType="number"
+                android:paddingLeft="14dp"
+                android:paddingRight="14dp"
+                android:textColor="@color/gr_text"
+                android:textColorHint="@color/gr_text_dim"
+                android:textSize="15sp" />
+
+            <TextView
+                android:layout_width="36dp"
+                android:layout_height="48dp"
+                android:gravity="center"
+                android:text="×"
+                android:textColor="@color/gr_text_muted"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/input_sets"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_input"
+                android:hint="set"
+                android:inputType="number"
+                android:paddingLeft="14dp"
+                android:paddingRight="14dp"
+                android:textColor="@color/gr_text"
+                android:textColorHint="@color/gr_text_dim"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/input_weight"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginRight="10dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_input"
+                android:hint="kg"
+                android:inputType="numberDecimal"
+                android:paddingLeft="14dp"
+                android:paddingRight="14dp"
+                android:textColor="@color/gr_text"
+                android:textColorHint="@color/gr_text_dim"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/save_progress"
+                android:layout_width="138dp"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_card_blue"
+                android:gravity="center"
+                android:text="Lưu tiến độ"
+                android:textColor="@color/gr_background"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/save_result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/gr_blue"
+            android:textSize="13sp" />
+    </LinearLayout>
+</LinearLayout>

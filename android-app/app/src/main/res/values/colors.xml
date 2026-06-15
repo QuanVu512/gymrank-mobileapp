@@ -5,9 +5,15 @@
     <color name="gr_border">#3C344A</color>
     <color name="gr_blue">#55B8F2</color>
     <color name="gr_blue_dark">#268AC7</color>
+    <color name="gr_bronze">#C8753D</color>
+    <color name="gr_silver">#C9D3DC</color>
     <color name="gr_gold">#F7B733</color>
     <color name="gr_green">#6DD47E</color>
     <color name="gr_text">#FFFFFF</color>
     <color name="gr_text_muted">#B8B0C8</color>
     <color name="gr_text_dim">#756D82</color>
+    <color name="bodygraph_neutral_muscle">#383D3B</color>
+    <color name="bodygraph_passive_part">#8F9598</color>
+    <color name="bodygraph_separator">#D1D6D4</color>
+    <color name="bodygraph_outline">#BFC5C3</color>
 </resources>

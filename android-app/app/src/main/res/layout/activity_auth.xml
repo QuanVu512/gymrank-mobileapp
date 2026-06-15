@@ -35,7 +35,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="26dp"
-                android:text="Chao mung den GymRank"
+                android:text="Chào mừng đến GymRank"
                 android:textColor="@color/gr_text"
                 android:textSize="30sp"
                 android:textStyle="bold" />
@@ -46,7 +46,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:lineSpacingExtra="4dp"
-                android:text="Dang nhap de dong bo level, rank va streak cua ban."
+                android:text="Đăng nhập để đồng bộ level, rank và chuỗi tập của bạn."
                 android:textColor="@color/gr_text_muted"
                 android:textSize="16sp" />
 
@@ -66,7 +66,7 @@
                     android:layout_weight="1"
                     android:background="@drawable/bg_segment_selected"
                     android:gravity="center"
-                    android:text="Dang nhap"
+                    android:text="Đăng nhập"
                     android:textColor="@color/gr_background"
                     android:textSize="15sp"
                     android:textStyle="bold" />
@@ -79,7 +79,7 @@
                     android:layout_weight="1"
                     android:background="@drawable/bg_segment_normal"
                     android:gravity="center"
-                    android:text="Dang ky"
+                    android:text="Đăng ký"
                     android:textColor="@color/gr_text_muted"
                     android:textSize="15sp"
                     android:textStyle="bold" />
@@ -91,7 +91,7 @@
                 android:layout_height="58dp"
                 android:layout_marginTop="18dp"
                 android:background="@drawable/bg_input"
-                android:hint="Ten hien thi"
+                android:hint="Tên hiển thị"
                 android:inputType="textPersonName"
                 android:maxLines="1"
                 android:paddingLeft="18dp"
@@ -122,7 +122,7 @@
                 android:layout_height="58dp"
                 android:layout_marginTop="14dp"
                 android:background="@drawable/bg_input"
-                android:hint="Mat khau toi thieu 6 ky tu"
+                android:hint="Mật khẩu tối thiểu 6 ký tự"
                 android:inputType="textPassword"
                 android:maxLines="1"
                 android:paddingLeft="18dp"
@@ -137,7 +137,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:lineSpacingExtra="3dp"
-                android:text="Du lieu dang luu tam tren backend local. Khi co database online, tai khoan se giu duoc sau khi restart server."
+                android:text="Hồ sơ và tiến trình tập luyện của bạn sẽ được đồng bộ trực tuyến."
                 android:textColor="@color/gr_text_muted"
                 android:textSize="13sp" />
 
@@ -148,7 +148,7 @@
                 android:layout_marginTop="20dp"
                 android:background="@drawable/bg_card_blue"
                 android:gravity="center"
-                android:text="Dang nhap"
+                android:text="Đăng nhập"
                 android:textColor="@color/gr_background"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -160,7 +160,7 @@
                 android:layout_marginTop="14dp"
                 android:background="@drawable/bg_option_normal"
                 android:gravity="center"
-                android:text="Tiep tuc voi Google"
+                android:text="Tiếp tục với Google"
                 android:textColor="@color/gr_text"
                 android:textSize="16sp"
                 android:textStyle="bold" />

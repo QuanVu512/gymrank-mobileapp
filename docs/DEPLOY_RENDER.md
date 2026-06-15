@@ -102,7 +102,7 @@ Sau do build APK lai.
 ```sql
 select * from app_users order by id desc;
 select * from user_profiles;
-select * from onboarding_answers order by id desc;
+select * from onboarding_answers order by user_id desc;
 select * from user_stats;
 ```
 
